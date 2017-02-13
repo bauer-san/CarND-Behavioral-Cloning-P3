@@ -64,7 +64,7 @@ The Nvidia model was a reasonable starting point because it was originally devel
 The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes:
 
 |  Layer (type)                    | Output Shape         |  Param #     | Connected to                 |
-----------------------------------------------------------| -------------| -----------------------------|                     
+|----------------------------------|----------------------| -------------| -----------------------------|                     
 | lambda_1 (Lambda)                | (None, 160, 320, 3)  |  0           | lambda_input_1[0][0]         |      
 | cropping2d_1 (Cropping2D)        | (None, 80, 320, 3)   |  0           | lambda_1[0][0]               |       
 | convolution2d_1 (Convolution2D)  | (None, 38, 158, 24)  |  1824        | cropping2d_1[0][0]           |     
@@ -92,13 +92,12 @@ The final model architecture (model.py lines 18-24) consisted of a convolution n
 Using a dataset of center lane driving of one (or maybe two, I forget) and only the images from the center camera, the model trained pretty well with an accuracy in range of 70% but the validation set was never more than 30%.  Still, I decided to see how the model would perform in the simulator - and to prove the workflow.  I was jumping for joy when the car didn't immediately drive off the road but I stopped jumping when it drove in to the lake just before the bridge.
 
 Here is an example image of center lane driving:
-![alt text](.\my_test_data\IMG\center_2017_02_11_11_03_04_094.jpg "Center lane driving")
-
+![Center lane driving](/my_test_data/IMG/center_2017_02_11_11_03_04_094.jpg "Center lane driving")
 
 I realized that the model didn't steer away from the road edge because it had not been trained to do that yet.  I recorded one lap of recovery data where I stopped the vehicle while pointing at the right road edge and steered it back to the center of the lane.  I recorded only the right road edge recovery because the data is augmented by flipping the images and steering angles before the training.
 
 Here is an example image of recovery driving:
-![alt text](.\my_test_data\IMG\right_2017_02_12_08_21_20_953.jpg "Recovery driving")
+![Recovery driving](/my_test_data/IMG/right_2017_02_12_08_21_20_953.jpg "Recovery driving")
 
 At the same time, I added the **cropping layer** to reduce the amount of time for training.  I trimmed the original height of 160 pixels to 80.  Half of the data to crunch.  Nice!
 
