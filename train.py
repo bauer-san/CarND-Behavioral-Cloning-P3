@@ -113,4 +113,4 @@ model.compile(loss='mse',
 early_stopping = EarlyStopping(monitor='val_loss', patience=2)
 model.fit(imgs, steer_angle, nb_epoch=10, validation_split=0.2, callbacks=[early_stopping])
 
-model.save('py_model.h5')
+model.save('model.h5')
