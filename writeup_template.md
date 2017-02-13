@@ -39,25 +39,23 @@ My model is instantiated in line 70 of model.py and the model layers are defined
 
 ####2. Attempts to reduce overfitting in the model
 
-I added dropout layers, each with 0.5 keep probability, after each convolution layer to reduce overfitting.  The model was trained and validated on different data sets using `validation_split=0.2` argument of Keras `model.fit` to ensure that the model was not overfitting.  The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+I added dropout layers, each with 0.5 keep probability, after each convolution layer to reduce overfitting.  The model was trained and validated on different data sets using `validation_split=0.2` argument of Keras `model.fit` to ensure that the model was not overfitting.  I also defined an early stopping callback to stop training when the loss was not improving to avoid overfitting.  The model was tested by running it through the beta simulator and ensuring that the vehicle could stay on the track.
 
 ####3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 110-112).
+The model uses an adam optimizer to minimize the mean square error, so the learning rate was not tuned manually (model.py line 110-112).
 
 ####4. Appropriate training data
 
 A total of 8380 images were recorded.  Approximately 8000 of the images were of center lane driving and the remainder were edge recovery from right road edge.  I flipped each image around vertical axis and changed sign of the steering input. 
 
-For details about how I created the training data, see the section 3. 
+For details about how I created the training data, see the Section 3 below. 
 
 ###Model Architecture and Training Strategy
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to start with an existing model, the Nvidia autopilot model, then add features as they seemed to be necessary.  Sort of a bottom-up approach.
-
-The Nvidia model was a reasonable starting point because it was originally developed as an end-to-end model from images as input to steering as output.  I with the Nvidia model and I added the Lambda layer to **perform normalization** as a starting model.
+My overall strategy for deriving a model architecture was to start with an existing model, the Nvidia autopilot model, then add features as they seemed to be necessary, a bottom-up approach.  The Nvidia model was a reasonable starting point because it was originally developed as an end-to-end model from images as input to steering as output.  I added the Lambda layer to **perform normalization** as a starting point for the model.
 
 ####2. Final Model Architecture
 
@@ -88,7 +86,12 @@ The final model architecture (model.py lines 18-24) consisted of a convolution n
 | Non-trainable params: 0          |                      |              |                              | 
 
 ####3. Creation of the Training Set & Training Process
+#####Summary of Training Process
+In summary, I collected 8380 data points of center and recovery driving that I pre-processed by converting to YUV colorspace.  The 8380 images and steering angles were flipped and the model was trained on 16760 images.  20% of the data was withheld for validation.
 
+I used an adam optimizer so that manually training the learning rate wasn't necessary.
+
+#####Detailed Training Process
 Using a dataset of center lane driving of one (or maybe two, I forget) and only the images from the center camera, the model trained pretty well with an accuracy in range of 70% but the validation set was never more than 30%.  Still, I decided to see how the model would perform in the simulator - and to prove the workflow.  I was jumping for joy when the car didn't immediately drive off the road but I stopped jumping when it drove in to the lake just before the bridge.
 
 Here is an example image of center lane driving:
@@ -101,11 +104,4 @@ Here is an example image of recovery driving:
 
 At the same time, I added the **cropping layer** to reduce the amount of time for training.  I trimmed the original height of 160 pixels to 80.  Half of the data to crunch.  Nice!
 
-I retrained the model and found the vehicle was steering wildly when it reached the lane edge.  This is because the recovery data I recorded was all recorded within *initial_speed=0*.  The steering angle was way too high for the speed that the simulator was driving, ~23 mph.  I decided to scale the steering inputs of the recovery data and it took a few iterations to find a suitable scale.  A scale of 0.5x improved the erratic steering at the road edge.  I was surprised when the car was able to drive laps without running off the road but it was still not nice because the car sort of rode the curb on the bridge.  This was when I started to think more about what was happening and I realized that I had converted the colorspace of the training data to YUV but I had not done the same in the `drive.py`.  I updated drive.py and at the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
-#####Summary of Training Process
-I had 8380 data points which I preprocessed by converting to YUV colorspace.  The 8380 images and steering angles were flipped and the model was trained on 16760 images.  20% of the data was withheld for validation.
-
-I also defined an early stopping callback to stop training when the loss was not improving to avoid overfitting. 
-
-I used an adam optimizer so that manually training the learning rate wasn't necessary.
+I retrained the model with those changes and found the vehicle was steering wildly when it reached the lane edge.  This is because the recovery data I recorded was all recorded with an *initial_speed=0*.  The steering angle was way too high for the speed that the simulator was driving, ~23 mph.  I decided to scale the steering inputs of the recovery data and it took a few iterations to find a suitable scale.  A scale of 0.5x improved the erratic steering at the road edge.  I was surprised when the car was able to drive laps without running off the road but it was still not nice because the car sort of rode the curb on the bridge.  This was when I started to think more about what was happening and I realized that I had converted the colorspace of the training data to YUV but I had not done the same in the `drive.py`.  I updated drive.py and at the end of the process, the vehicle is able to drive autonomously and nicely around the track.
